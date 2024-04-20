@@ -52,7 +52,7 @@ const Home = () => {
                 <div className="navbar-end" />
             </div>
             <div className="flex flex-col justify-center items-center mt-5">
-                <select defaultValue="15" className="select select-bordered w-36" onChange={e => setInterval(parseInt(e.target.value))}>
+                <select defaultValue="15" className="select select-bordered w-36 mb-4" onChange={e => setInterval(parseInt(e.target.value))}>
                     <option value="10">10 seconds</option>
                     <option value="15">15 seconds</option>
                     <option value="25">25 seconds</option>
@@ -78,14 +78,14 @@ const Home = () => {
                         });
                     }}
                 />
-                <div className="flex w-full justify-center items-center gap-10">
+                <div className="flex flex-wrap justify-center items-center gap-10 mt-4 mb-4">
                     <div className="flex flex-col items-center">
                         <p className="text-lg">Target Student</p>
                         <div className="flex w-56">
                             <button className="btn btn-lg w-1/2 btn-active rounded-r-none text-xl" onClick={() => addToTarget({ x: 1, o: 0})}>X</button>
                             <button className="btn btn-lg w-1/2 btn-active rounded-l-none text-xl" onClick={() => addToTarget({ x: 0, o: 1})}>O</button>
                         </div>
-                        <div className="flex w-56">
+                        <div className="flex w-56 mb-5">
                             <span className="w-1/2 text-center">{target.x}</span>
                             <span className="w-1/2 text-center">{target.o}</span>
                         </div>
@@ -98,7 +98,7 @@ const Home = () => {
                             <button className="btn btn-lg w-1/2 btn-active rounded-r-none text-xl" onClick={() => addToComparison({x: 1, o: 0})}>X</button>
                             <button className="btn btn-lg w-1/2 btn-active rounded-l-none text-xl" onClick={() => addToComparison({x: 0, o: 1})}>O</button>
                         </div>
-                        <div className="flex w-56">
+                        <div className="flex w-56 mb-4">
                             <span className="w-1/2 text-center">{comparison.x}</span>
                             <span className="w-1/2 text-center">{comparison.o}</span>
                         </div>
