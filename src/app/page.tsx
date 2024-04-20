@@ -4,11 +4,41 @@ import Timer from "@/components/Timer";
 import useTimer from "@/hooks/useTimer";
 import { useState } from "react";
 
+interface XO {
+    x: number
+    o: number
+}
+
 const Home = () => {
     const { totalSeconds, setTotalSeconds, shouldIncrement, setShouldIncrement } = useTimer();
     const [interval, setInterval] = useState(15);
-    const [targetOs, setTargetOs] = useState(0);
-    const [comparisonOs, setComparisonOs] = useState(0);
+
+    const [target, setTarget] = useState({
+        x: 0,
+        o: 0
+    });
+    const [comparison, setComparison] = useState({
+        x: 0,
+        o: 0
+    });
+
+    const addToTarget = (toAdd: XO) => {
+        setTarget(prev => {
+            return {
+                x: prev.x + toAdd.x,
+                o: prev.o + toAdd.o
+            }
+        })
+    }
+
+    const addToComparison = (toAdd: XO) => {
+        setComparison(prev => {
+            return {
+                x: prev.x + toAdd.x,
+                o: prev.o + toAdd.o
+            }
+        })
+    }
     
     const numIntervals = Math.floor(totalSeconds / interval);
 
@@ -38,27 +68,41 @@ const Home = () => {
                     resetAction={() => {
                         setShouldIncrement(false);
                         setTotalSeconds(0);
-                        setTargetOs(0);
-                        setComparisonOs(0);
+                        setTarget({
+                            x: 0,
+                            o: 0
+                        });
+                        setComparison({
+                            x: 0,
+                            o: 0
+                        });
                     }}
                 />
                 <div className="flex w-full justify-center items-center gap-10">
                     <div className="flex flex-col items-center">
                         <p className="text-lg">Target Student</p>
                         <div className="flex w-56">
-                            <button className="btn btn-lg w-1/2 btn-active rounded-r-none text-xl">X</button>
-                            <button className="btn btn-lg w-1/2 btn-active rounded-l-none text-xl" onClick={() => setTargetOs(prev => prev + 1)}>O</button>
+                            <button className="btn btn-lg w-1/2 btn-active rounded-r-none text-xl" onClick={() => addToTarget({ x: 1, o: 0})}>X</button>
+                            <button className="btn btn-lg w-1/2 btn-active rounded-l-none text-xl" onClick={() => addToTarget({ x: 0, o: 1})}>O</button>
                         </div>
-                        <span>{targetOs} / {numIntervals} = {numIntervals === 0 ? 0 : ((targetOs / numIntervals) * 100).toFixed(2)}%</span>
+                        <div className="flex w-56">
+                            <span className="w-1/2 text-center">{target.x}</span>
+                            <span className="w-1/2 text-center">{target.o}</span>
+                        </div>
+                        <span>{target.o} / {numIntervals} = {numIntervals === 0 ? 0 : ((target.o / numIntervals) * 100).toFixed(2)}%</span>
                     </div>
 
                     <div className="flex flex-col items-center">
                         <p className="text-lg">Comparison</p>
                         <div className="flex w-56">
-                            <button className="btn btn-lg w-1/2 btn-active rounded-r-none text-xl">X</button>
-                            <button className="btn btn-lg w-1/2 btn-active rounded-l-none text-xl" onClick={() => setComparisonOs(prev => prev + 1)}>O</button>
+                            <button className="btn btn-lg w-1/2 btn-active rounded-r-none text-xl" onClick={() => addToComparison({x: 1, o: 0})}>X</button>
+                            <button className="btn btn-lg w-1/2 btn-active rounded-l-none text-xl" onClick={() => addToComparison({x: 0, o: 1})}>O</button>
                         </div>
-                        <span>{comparisonOs} / {numIntervals} = {numIntervals === 0 ? 0 : ((comparisonOs / numIntervals) * 100).toFixed(2)}%</span>
+                        <div className="flex w-56">
+                            <span className="w-1/2 text-center">{comparison.x}</span>
+                            <span className="w-1/2 text-center">{comparison.o}</span>
+                        </div>
+                        <span>{comparison.o} / {numIntervals} = {numIntervals === 0 ? 0 : ((comparison.o / numIntervals) * 100).toFixed(2)}%</span>
                     </div>
                 </div>
             </div>
