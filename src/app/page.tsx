@@ -1,5 +1,6 @@
 'use client';
 
+import NavBar from "@/components/NavBar";
 import Timer from "@/components/Timer";
 import useTimer from "@/hooks/useTimer";
 import { useState } from "react";
@@ -44,14 +45,8 @@ const Home = () => {
 
     return (
         <>
-            <div className="navbar bg-base-200 drop-shadow-lg">
-                <div className="navbar-start" />
-                <div className="navbar-center">
-                    <p className="text-3xl">Interval Recording</p>
-                </div>
-                <div className="navbar-end" />
-            </div>
-            <div className="flex flex-col justify-center items-center mt-5">
+            <NavBar/>
+            <div className="flex flex-col justify-center items-center mt-5 px-4">
                 <select defaultValue="15" className="select select-bordered w-36 mb-4" onChange={e => setInterval(parseInt(e.target.value))}>
                     <option value="10">10 seconds</option>
                     <option value="15">15 seconds</option>
