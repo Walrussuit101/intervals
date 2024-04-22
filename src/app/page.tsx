@@ -74,10 +74,12 @@ const Home = () => {
                         <span>Comparison: {oCount.comparisonOs} / {numIntervals} = {numIntervals === 0 ? 0 : ((oCount.comparisonOs / numIntervals) * 100).toFixed(2)}%</span>
                     </div>
                     {
-                        intervalSubjects.map((subjects, i) => {
+                        intervalSubjects.reverse().map((subjects, i) => {
                             return (
-                                <div key={subjects.id} className="border-2 border-solid border-neutral rounded-lg p-2">
-                                    <p className="font-bold text-lg">Interval {i + 1}:</p>
+                                <div key={subjects.id} className="border-2 border-solid border-neutral rounded-lg p-2 relative">
+                                    <div className="absolute top-0 left-0 bg-neutral py-1 px-2 text-white rounded-br-lg">
+                                        <span>{intervalSubjects.length - i}</span>
+                                    </div>
                                     <BehaviorSelector
                                         subjects={subjects}
                                         updateSubjects={updateSubjects}
