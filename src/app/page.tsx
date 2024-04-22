@@ -13,10 +13,16 @@ const Home = () => {
     const [interval, setInterval] = useState(15);
     const numIntervals = Math.floor(totalSeconds / interval);
 
-    const [intervalSubjects, setIntervalSubjects] = useState<IntervalSubjects[]>([])
+    const [intervalSubjects, setIntervalSubjects] = useState<IntervalSubjects[]>([
+        {
+            id: uuidv4(),
+            target: null,
+            comparison: null
+        }
+    ])
 
     useEffect(() => {
-        if (numIntervals > intervalSubjects.length) {
+        if (numIntervals + 1 > intervalSubjects.length) {
             setIntervalSubjects(prev => {
                 return [
                     ...prev,
@@ -65,7 +71,11 @@ const Home = () => {
                     resetAction={() => {
                         setShouldIncrement(false);
                         setTotalSeconds(0);
-                        setIntervalSubjects([]);
+                        setIntervalSubjects([{
+                            id: uuidv4(),
+                            target: null,
+                            comparison: null
+                        }]);
                     }}
                 />
                 <div className="flex flex-col gap-5 my-5">
@@ -74,7 +84,7 @@ const Home = () => {
                         <span>Comparison: {oCount.comparisonOs} / {numIntervals} = {numIntervals === 0 ? 0 : ((oCount.comparisonOs / numIntervals) * 100).toFixed(2)}%</span>
                     </div>
                     {
-                        intervalSubjects.reverse().map((subjects, i) => {
+                        intervalSubjects.slice().reverse().map((subjects, i) => {
                             return (
                                 <div key={subjects.id} className="border-2 border-solid border-neutral rounded-lg p-2 relative">
                                     <div className="absolute top-0 left-0 bg-neutral py-1 px-2 text-white rounded-br-lg">
