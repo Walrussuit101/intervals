@@ -7,13 +7,12 @@ export const downloadSpreadsheet = async (subjects: IntervalSubjects[]) => {
     const sheet = workbook.addWorksheet('Interval Recording');
 
     // write data to sheet
-    sheet.addRow(['Interval', 'Target', null, 'Comparison']);
+    sheet.addRow(['Interval', 'Target', 'Comparison']);
 
     subjects.forEach((subject, i) => {       
         sheet.addRow([
             i+1,
             subject.target === null ? 'none' : subject.target.toUpperCase(),
-            null,
             subject.comparison === null ? 'none' : subject.comparison.toUpperCase()
         ]);
     });
