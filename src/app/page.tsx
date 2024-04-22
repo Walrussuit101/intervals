@@ -1,5 +1,6 @@
 'use client';
 
+import { downloadSpreadsheet } from "@/SpreadSheet";
 import BehaviorSelector from "@/components/BehaviorSelector";
 import NavBar from "@/components/NavBar";
 import Timer from "@/components/Timer";
@@ -11,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 const Home = () => {
     const { totalSeconds, setTotalSeconds, shouldIncrement, setShouldIncrement } = useTimer();
     const [interval, setInterval] = useState(15);
-    const numIntervals = Math.floor(totalSeconds / interval);
+    const numIntervals = Math.ceil(totalSeconds / interval);
 
     const [intervalSubjects, setIntervalSubjects] = useState<IntervalSubjects[]>([
         {
@@ -22,7 +23,9 @@ const Home = () => {
     ])
 
     useEffect(() => {
-        if (numIntervals + 1 > intervalSubjects.length) {
+        const competedIntervals = Math.floor((totalSeconds - 1) / interval)
+
+        if (competedIntervals + 1 > intervalSubjects.length) {
             setIntervalSubjects(prev => {
                 return [
                     ...prev,
@@ -34,7 +37,7 @@ const Home = () => {
                 ]
             })
         }
-    }, [numIntervals]);
+    }, [totalSeconds, interval]);
 
     const updateSubjects = (id: string, target: Behavior, comparison: Behavior) => {
         const newIntervalSubjects = intervalSubjects.map(subjects => {
@@ -55,14 +58,20 @@ const Home = () => {
         <>
             <NavBar/>
             <div className="flex flex-col justify-center items-center mt-5 px-4">
-                <select defaultValue="15" disabled={shouldIncrement || totalSeconds > 0} className="select select-bordered w-36 mb-4" onChange={e => setInterval(parseInt(e.target.value))}>
-                    <option value="10">10 seconds</option>
-                    <option value="15">15 seconds</option>
-                    <option value="25">25 seconds</option>
-                    <option value="30">30 seconds</option>
-                    <option value="45">45 seconds</option>
-                    <option value="60">60 seconds</option>
-                </select>
+                <div className="flex gap-4">
+                    <select defaultValue="15" disabled={shouldIncrement || totalSeconds > 0} className="select select-bordered w-36 mb-4" onChange={e => setInterval(parseInt(e.target.value))}>
+                        <option value="10">10 seconds</option>
+                        <option value="15">15 seconds</option>
+                        <option value="25">25 seconds</option>
+                        <option value="30">30 seconds</option>
+                        <option value="45">45 seconds</option>
+                        <option value="60">60 seconds</option>
+                    </select>
+                    <button className="btn btn-neutral btn-outline" disabled={shouldIncrement} onClick={() => downloadSpreadsheet(intervalSubjects)}>
+                        Download
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="currentColor"><path d="M10 13h-4v-1h4v1zm2.318-4.288l3.301 3.299-4.369.989 1.068-4.288zm11.682-5.062l-7.268 7.353-3.401-3.402 7.267-7.352 3.402 3.401zm-6 8.916v.977c0 4.107-6 2.457-6 2.457s1.518 6-2.638 6h-7.362v-20h14.056l1.977-2h-18.033v24h10.189c3.163 0 9.811-7.223 9.811-9.614v-3.843l-2 2.023z"/></svg>
+                    </button>
+                </div>
                 <Timer
                     totalSeconds={totalSeconds}
                     shouldIncrement={shouldIncrement}
