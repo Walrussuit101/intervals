@@ -1,53 +1,55 @@
 'use client';
 
+import BehaviorSelector from "@/components/BehaviorSelector";
 import NavBar from "@/components/NavBar";
 import Timer from "@/components/Timer";
 import useTimer from "@/hooks/useTimer";
-import { useState } from "react";
-
-interface XO {
-    x: number
-    o: number
-}
+import { Behavior, IntervalSubjects } from "@/types";
+import { useEffect, useState } from "react";
+import { v4 as uuidv4 } from 'uuid';
 
 const Home = () => {
     const { totalSeconds, setTotalSeconds, shouldIncrement, setShouldIncrement } = useTimer();
     const [interval, setInterval] = useState(15);
-
-    const [target, setTarget] = useState({
-        x: 0,
-        o: 0
-    });
-    const [comparison, setComparison] = useState({
-        x: 0,
-        o: 0
-    });
-
-    const addToTarget = (toAdd: XO) => {
-        setTarget(prev => {
-            return {
-                x: prev.x + toAdd.x,
-                o: prev.o + toAdd.o
-            }
-        })
-    }
-
-    const addToComparison = (toAdd: XO) => {
-        setComparison(prev => {
-            return {
-                x: prev.x + toAdd.x,
-                o: prev.o + toAdd.o
-            }
-        })
-    }
-    
     const numIntervals = Math.floor(totalSeconds / interval);
 
+    const [intervalSubjects, setIntervalSubjects] = useState<IntervalSubjects[]>([])
+
+    useEffect(() => {
+        if (numIntervals > intervalSubjects.length) {
+            setIntervalSubjects(prev => {
+                return [
+                    ...prev,
+                    {
+                        id: uuidv4(),
+                        target: null,
+                        comparison: null
+                    }
+                ]
+            })
+        }
+    }, [numIntervals]);
+
+    const updateSubjects = (id: string, target: Behavior, comparison: Behavior) => {
+        const newIntervalSubjects = intervalSubjects.map(subjects => {
+            if (subjects.id === id) {
+                subjects.target = target;
+                subjects.comparison = comparison;
+            }
+
+            return subjects;
+        })
+
+        setIntervalSubjects(newIntervalSubjects);
+    }
+
+    const oCount = sumOs(intervalSubjects);
+    
     return (
         <>
             <NavBar/>
             <div className="flex flex-col justify-center items-center mt-5 px-4">
-                <select defaultValue="15" className="select select-bordered w-36 mb-4" onChange={e => setInterval(parseInt(e.target.value))}>
+                <select defaultValue="15" disabled={shouldIncrement || totalSeconds > 0} className="select select-bordered w-36 mb-4" onChange={e => setInterval(parseInt(e.target.value))}>
                     <option value="10">10 seconds</option>
                     <option value="15">15 seconds</option>
                     <option value="25">25 seconds</option>
@@ -63,42 +65,27 @@ const Home = () => {
                     resetAction={() => {
                         setShouldIncrement(false);
                         setTotalSeconds(0);
-                        setTarget({
-                            x: 0,
-                            o: 0
-                        });
-                        setComparison({
-                            x: 0,
-                            o: 0
-                        });
+                        setIntervalSubjects([]);
                     }}
                 />
-                <div className="flex flex-wrap justify-center items-center gap-10 mt-4 mb-4">
-                    <div className="flex flex-col items-center">
-                        <p className="text-lg">Target Student</p>
-                        <div className="flex w-56">
-                            <button className="btn btn-lg w-1/2 btn-active rounded-r-none text-xl" onClick={() => addToTarget({ x: 1, o: 0})}>X</button>
-                            <button className="btn btn-lg w-1/2 btn-active rounded-l-none text-xl" onClick={() => addToTarget({ x: 0, o: 1})}>O</button>
-                        </div>
-                        <div className="flex w-56 mb-5">
-                            <span className="w-1/2 text-center">{target.x}</span>
-                            <span className="w-1/2 text-center">{target.o}</span>
-                        </div>
-                        <span>{target.o} / {numIntervals} = {numIntervals === 0 ? 0 : ((target.o / numIntervals) * 100).toFixed(2)}%</span>
+                <div className="flex flex-col gap-5 my-5">
+                    <div className="flex flex-wrap justify-between gap-x-8">
+                        <span>Target: {oCount.targetOs} / {numIntervals} = {numIntervals === 0 ? 0 : ((oCount.targetOs / numIntervals) * 100).toFixed(2)}%</span>
+                        <span>Comparison: {oCount.comparisonOs} / {numIntervals} = {numIntervals === 0 ? 0 : ((oCount.comparisonOs / numIntervals) * 100).toFixed(2)}%</span>
                     </div>
-
-                    <div className="flex flex-col items-center">
-                        <p className="text-lg">Comparison</p>
-                        <div className="flex w-56">
-                            <button className="btn btn-lg w-1/2 btn-active rounded-r-none text-xl" onClick={() => addToComparison({x: 1, o: 0})}>X</button>
-                            <button className="btn btn-lg w-1/2 btn-active rounded-l-none text-xl" onClick={() => addToComparison({x: 0, o: 1})}>O</button>
-                        </div>
-                        <div className="flex w-56 mb-4">
-                            <span className="w-1/2 text-center">{comparison.x}</span>
-                            <span className="w-1/2 text-center">{comparison.o}</span>
-                        </div>
-                        <span>{comparison.o} / {numIntervals} = {numIntervals === 0 ? 0 : ((comparison.o / numIntervals) * 100).toFixed(2)}%</span>
-                    </div>
+                    {
+                        intervalSubjects.map((subjects, i) => {
+                            return (
+                                <div key={subjects.id} className="border-2 border-solid border-neutral rounded-lg p-2">
+                                    <p className="font-bold text-lg">Interval {i + 1}:</p>
+                                    <BehaviorSelector
+                                        subjects={subjects}
+                                        updateSubjects={updateSubjects}
+                                    />
+                                </div>
+                            )
+                        })
+                    }
                 </div>
             </div>
         </>
@@ -106,3 +93,23 @@ const Home = () => {
 }
 
 export default Home;
+
+const sumOs = (intervalSubjects: IntervalSubjects[]) => {
+    let targetOs = 0;
+    let comparisonOs = 0;
+
+    intervalSubjects.forEach(subjects => {
+        if (subjects.target === 'o') {
+            targetOs++;
+        }
+
+        if (subjects.comparison === 'o') {
+            comparisonOs++;
+        }
+    })
+
+    return {
+        targetOs,
+        comparisonOs
+    }
+}
