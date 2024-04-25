@@ -51,6 +51,7 @@ const Rate = () => {
                     resetAction={() => {
                         setShouldIncrement(false);
                         setTotalSeconds(0);
+                        setRateCounters([]);
                     }}
                 />
                 <div className="flex flex-col justify-center items-center gap-5 mt-8">
