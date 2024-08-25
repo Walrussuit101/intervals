@@ -1,21 +1,34 @@
 import { Workbook } from 'exceljs';
 import { IntervalSubjects } from './types';
 
-export const downloadSpreadsheet = async (subjects: IntervalSubjects[]) => {
+export const downloadSpreadsheet = async (subjects: IntervalSubjects[], comparison?: boolean) => {
     // build workbook / add a sheet
     const workbook = new Workbook();
     const sheet = workbook.addWorksheet('Interval Recording');
 
-    // write data to sheet
-    sheet.addRow(['Interval', 'Target', 'Comparison']);
+    if (comparison) {
+        // write data to sheet
+        sheet.addRow(['Interval', 'Target', 'Comparison']);
 
-    subjects.forEach((subject, i) => {       
-        sheet.addRow([
-            i+1,
-            subject.target === null ? 'none' : subject.target.toUpperCase(),
-            subject.comparison === null ? 'none' : subject.comparison.toUpperCase()
-        ]);
-    });
+        subjects.forEach((subject, i) => {       
+            sheet.addRow([
+                i+1,
+                subject.target === null ? 'none' : subject.target.toUpperCase(),
+                subject.comparison === null ? 'none' : subject.comparison.toUpperCase()
+            ]);
+        });
+    } else {
+        // write data to sheet
+        sheet.addRow(['Interval', 'Target']);
+
+        subjects.forEach((subject, i) => {       
+            sheet.addRow([
+                i+1,
+                subject.target === null ? 'none' : subject.target.toUpperCase()
+            ]);
+        });
+    }
+    
 
     // build blob url
     const now = new Date();
