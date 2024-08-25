@@ -116,7 +116,8 @@ const Home = () => {
                             const isCurrent = i === 0;
                             return (
                                 <div key={subjects.id} className="border-2 border-solid border-neutral rounded-lg p-2 relative">
-                                    <div className={`absolute top-0 left-0 py-1 px-2 rounded-br-lg ${isCurrent ? 'bg-neutral text-white' : 'bg-neutral-content text-black rounded-tl-lg'}`}>
+                                    <div className={`absolute top-0 left-0 py-1 px-2 rounded-br-lg indicator ${isCurrent ? 'bg-neutral text-white' : 'bg-base-300 text-black rounded-tl-lg'}`}>
+                                        { isCurrent && <span className="indicator-item indicator-start badge badge-success"></span> }
                                         <span>{intervalSubjects.length - i}</span>
                                     </div>
                                     <BehaviorSelector
