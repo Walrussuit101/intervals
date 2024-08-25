@@ -12,6 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 const Home = () => {
     const { totalSeconds, setTotalSeconds, shouldIncrement, setShouldIncrement } = useTimer();
     const [interval, setInterval] = useState(15);
+    const [maxIntervals, setMaxIntervals] = useState<number>(Infinity);
     const [comparison, setComparison] = useState(false);
     const numIntervals = Math.floor(totalSeconds / interval);
 
@@ -40,6 +41,12 @@ const Home = () => {
         }
     }, [totalSeconds, interval]);
 
+    useEffect(() => {
+        if (numIntervals >= maxIntervals) {
+            setShouldIncrement(false);
+        }
+    }, [numIntervals]);
+
     const updateSubjects = (id: string, target: Behavior, comparison: Behavior) => {
         const newIntervalSubjects = intervalSubjects.map(subjects => {
             if (subjects.id === id) {
@@ -59,7 +66,7 @@ const Home = () => {
         <>
             <NavBar/>
             <div className="flex flex-col justify-center items-center mt-5 px-4 gap-2">
-                <div className="flex gap-4">
+                <div className="flex flex-wrap gap-4 justify-center">
                     <select defaultValue="15" disabled={shouldIncrement || totalSeconds > 0} className="select select-bordered w-36" onChange={e => setInterval(parseInt(e.target.value))}>
                         <option value="10">10 seconds</option>
                         <option value="15">15 seconds</option>
@@ -68,6 +75,7 @@ const Home = () => {
                         <option value="45">45 seconds</option>
                         <option value="60">60 seconds</option>
                     </select>
+                    <input type="number" className="input input-bordered w-28" disabled={shouldIncrement || totalSeconds > 0} value={maxIntervals} onChange={e => setMaxIntervals(parseInt(e.target.value))} />
                     <button className="btn btn-neutral btn-outline" disabled={shouldIncrement} onClick={() => downloadSpreadsheet(intervalSubjects, comparison)}>
                         Download
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="currentColor"><path d="M10 13h-4v-1h4v1zm2.318-4.288l3.301 3.299-4.369.989 1.068-4.288zm11.682-5.062l-7.268 7.353-3.401-3.402 7.267-7.352 3.402 3.401zm-6 8.916v.977c0 4.107-6 2.457-6 2.457s1.518 6-2.638 6h-7.362v-20h14.056l1.977-2h-18.033v24h10.189c3.163 0 9.811-7.223 9.811-9.614v-3.843l-2 2.023z"/></svg>
@@ -93,6 +101,7 @@ const Home = () => {
                             comparison: null
                         }]);
                     }}
+                    disablePlay={numIntervals >= maxIntervals}
                 />
                 <div className="flex flex-col gap-5 my-5">
                     <div className="flex flex-wrap justify-between gap-x-8">
@@ -104,9 +113,10 @@ const Home = () => {
                     </div>
                     {
                         intervalSubjects.slice().reverse().map((subjects, i) => {
+                            const isCurrent = i === 0;
                             return (
                                 <div key={subjects.id} className="border-2 border-solid border-neutral rounded-lg p-2 relative">
-                                    <div className="absolute top-0 left-0 bg-neutral py-1 px-2 text-white rounded-br-lg">
+                                    <div className={`absolute top-0 left-0 py-1 px-2 rounded-br-lg ${isCurrent ? 'bg-neutral text-white' : 'bg-neutral-content text-black rounded-tl-lg'}`}>
                                         <span>{intervalSubjects.length - i}</span>
                                     </div>
                                     <BehaviorSelector

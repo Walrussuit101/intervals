@@ -3,16 +3,17 @@ interface props {
     playAction: () => void,
     pauseAction: () => void,
     resetAction: () => void,
-    shouldIncrement: boolean
+    shouldIncrement: boolean,
+    disablePlay?: boolean
 }
-const Timer = ({ totalSeconds, playAction, pauseAction, resetAction, shouldIncrement }: props) => {
+const Timer = ({ totalSeconds, playAction, pauseAction, resetAction, shouldIncrement, disablePlay }: props) => {
     const minutes = Math.floor(totalSeconds / 60);
     const remainingSeconds = totalSeconds - (minutes * 60);
 
     return (
         <div className="flex">
             <div className="flex flex-col">
-                <button onClick={playAction} className={`btn btn-square ${!shouldIncrement ? 'btn-outline' : '' } btn-success rounded-none rounded-tl-md`}>
+                <button onClick={playAction} disabled={disablePlay} className={`btn btn-square ${!shouldIncrement ? 'btn-outline' : '' } btn-success rounded-none rounded-tl-md`}>
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="currentColor"><path d="M3 22v-20l18 10-18 10z"/></svg>
                 </button>
                 <button onClick={pauseAction} className={`btn btn-square ${shouldIncrement ? 'btn-outline' : '' } btn-info rounded-none`}>
