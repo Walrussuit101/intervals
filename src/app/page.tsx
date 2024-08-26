@@ -2,50 +2,61 @@
 
 import { downloadSpreadsheet } from "@/SpreadSheet";
 import BehaviorSelector from "@/components/BehaviorSelector";
+import NameModal from "@/components/NameModal";
 import NavBar from "@/components/NavBar";
 import Timer from "@/components/Timer";
 import useTimer from "@/hooks/useTimer";
 import { Behavior, IntervalSubjects } from "@/types";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
 
 const Home = () => {
     const { totalSeconds, setTotalSeconds, shouldIncrement, setShouldIncrement } = useTimer();
+    const currentNameIndex = useRef(0);
+    const [names, setNames] = useState<string[]>([]);
     const [interval, setInterval] = useState(15);
     const [maxIntervals, setMaxIntervals] = useState<number>(Infinity);
     const [comparison, setComparison] = useState(false);
     const numIntervals = Math.floor(totalSeconds / interval);
 
-    const [intervalSubjects, setIntervalSubjects] = useState<IntervalSubjects[]>([
-        {
-            id: uuidv4(),
-            target: null,
-            comparison: null
-        }
-    ])
+    const [intervalSubjects, setIntervalSubjects] = useState<IntervalSubjects[]>([])
 
     useEffect(() => {
-        const competedIntervals = Math.floor((totalSeconds - 1) / interval)
+        const competedIntervals = totalSeconds === 0 ? 0 : Math.floor((totalSeconds - 1) / interval)
 
-        if (competedIntervals + 1 > intervalSubjects.length) {
+        if (shouldIncrement && competedIntervals + 1 > intervalSubjects.length) {
             setIntervalSubjects(prev => {
                 return [
                     ...prev,
                     {
                         id: uuidv4(),
                         target: null,
-                        comparison: null
+                        comparison: null,
+                        name: names[currentNameIndex.current]
                     }
                 ]
             })
         }
-    }, [totalSeconds, interval]);
+    }, [totalSeconds, interval, shouldIncrement]);
 
     useEffect(() => {
         if (numIntervals >= maxIntervals) {
             setShouldIncrement(false);
         }
     }, [numIntervals]);
+
+    useEffect(() => {
+        if (intervalSubjects.length === 0) {
+            currentNameIndex.current = 0;
+            return;
+        }
+
+        if (currentNameIndex.current >= names.length - 1 ) {
+            currentNameIndex.current = 0;
+        } else {
+            currentNameIndex.current += 1;
+        }
+    }, [intervalSubjects.length])
 
     const updateSubjects = (id: string, target: Behavior, comparison: Behavior) => {
         const newIntervalSubjects = intervalSubjects.map(subjects => {
@@ -60,11 +71,46 @@ const Home = () => {
         setIntervalSubjects(newIntervalSubjects);
     }
 
+    const showNameModal = () => {
+        const modal = document.getElementById('name_modal') as HTMLDialogElement;
+        modal.showModal();
+    }
+
+    const addName = () => {
+        setNames(prev => {
+            return [
+                ...prev,
+                ''
+            ]
+        })
+    }
+
+    const removeName = (index: number) => {
+        const filtered = names.filter((name, i) => {
+            return i !== index;
+        });
+
+        setNames(filtered);
+    }
+
+    const updateName = (index: number, value: string) => {
+        const newNames = names.map((name, i) => {
+            if (i === index) {
+                return value;
+            } else {
+                return name;
+            }
+        })
+
+        setNames(newNames);
+    }
+
     const oCount = sumOs(intervalSubjects);
     
     return (
         <>
             <NavBar/>
+            <NameModal names={names} addName={addName} removeName={removeName} updateName={updateName} disable={shouldIncrement || totalSeconds > 0} />
             <div className="flex flex-col justify-center items-center mt-5 px-4 gap-2">
                 <div className="flex flex-wrap gap-4 justify-center">
                     <select defaultValue="15" disabled={shouldIncrement || totalSeconds > 0} className="select select-bordered w-36" onChange={e => setInterval(parseInt(e.target.value))}>
@@ -76,6 +122,9 @@ const Home = () => {
                         <option value="60">60 seconds</option>
                     </select>
                     <input type="number" className="input input-bordered w-28" disabled={shouldIncrement || totalSeconds > 0} value={maxIntervals} onChange={e => setMaxIntervals(parseInt(e.target.value))} />
+                    <button className="btn btn-neutral btn-outline" onClick={showNameModal}>
+                        Names ({names.length})
+                    </button>
                     <button className="btn btn-neutral btn-outline" disabled={shouldIncrement} onClick={() => downloadSpreadsheet(intervalSubjects, comparison)}>
                         Download
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" stroke="currentColor" fill="currentColor"><path d="M10 13h-4v-1h4v1zm2.318-4.288l3.301 3.299-4.369.989 1.068-4.288zm11.682-5.062l-7.268 7.353-3.401-3.402 7.267-7.352 3.402 3.401zm-6 8.916v.977c0 4.107-6 2.457-6 2.457s1.518 6-2.638 6h-7.362v-20h14.056l1.977-2h-18.033v24h10.189c3.163 0 9.811-7.223 9.811-9.614v-3.843l-2 2.023z"/></svg>
@@ -95,11 +144,7 @@ const Home = () => {
                     resetAction={() => {
                         setShouldIncrement(false);
                         setTotalSeconds(0);
-                        setIntervalSubjects([{
-                            id: uuidv4(),
-                            target: null,
-                            comparison: null
-                        }]);
+                        setIntervalSubjects([]);
                     }}
                     disablePlay={numIntervals >= maxIntervals}
                 />

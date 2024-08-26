@@ -9,7 +9,7 @@ const BehaviorSelector = ({ subjects, updateSubjects, comparison }: props) => {
     return (
         <div className="flex flex-wrap gap-x-3 gap-y-0 justify-center">
             <div className="flex flex-col items-center">
-                <p className="text-lg">Target Student</p>
+                <p className="text-lg">{subjects.name ? subjects.name : 'Target Student'}</p>
                 <div className="flex w-56">
                     <button 
                         className={`btn btn-lg btn-neutral w-1/2 ${subjects.target === 'x' ? 'btn-active' : 'btn-outline'} rounded-r-none text-xl`} 

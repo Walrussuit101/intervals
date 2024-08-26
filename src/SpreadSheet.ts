@@ -6,29 +6,38 @@ export const downloadSpreadsheet = async (subjects: IntervalSubjects[], comparis
     const workbook = new Workbook();
     const sheet = workbook.addWorksheet('Interval Recording');
 
-    if (comparison) {
-        // write data to sheet
-        sheet.addRow(['Interval', 'Target', 'Comparison']);
+    // build headers
+    const headers = ['Interval'];
 
-        subjects.forEach((subject, i) => {       
-            sheet.addRow([
-                i+1,
-                subject.target === null ? 'none' : subject.target.toUpperCase(),
-                subject.comparison === null ? 'none' : subject.comparison.toUpperCase()
-            ]);
-        });
-    } else {
-        // write data to sheet
-        sheet.addRow(['Interval', 'Target']);
-
-        subjects.forEach((subject, i) => {       
-            sheet.addRow([
-                i+1,
-                subject.target === null ? 'none' : subject.target.toUpperCase()
-            ]);
-        });
+    const hasNames = subjects.some(subject => subject.name !== undefined);
+    if (hasNames) {
+        headers.push('Name');
     }
-    
+
+    headers.push('Target');
+
+    if (comparison) {
+        headers.push('Comparison');
+    }
+
+    sheet.addRow(headers);
+
+    // add data rows
+    subjects.forEach((subject, i) => {
+        const data = [(i + 1).toString()];
+
+        if (hasNames) {
+            data.push(subject.name === undefined ? 'none' : subject.name);
+        }
+
+        data.push(subject.target === null ? 'none' : subject.target.toUpperCase());
+
+        if (comparison) {
+            data.push(subject.comparison === null ? 'none' : subject.comparison.toUpperCase());
+        }
+
+        sheet.addRow(data);
+    })    
 
     // build blob url
     const now = new Date();
