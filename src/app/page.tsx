@@ -110,7 +110,7 @@ const Home = () => {
     return (
         <>
             <NavBar/>
-            <NameModal names={names} addName={addName} removeName={removeName} updateName={updateName} disable={shouldIncrement || totalSeconds > 0} />
+            <NameModal names={names} addName={addName} removeName={removeName} updateName={updateName} disable={(shouldIncrement || totalSeconds > 0) && names.length === 0} />
             <div className="flex flex-col justify-center items-center mt-5 px-4 gap-2">
                 <div className="flex flex-wrap gap-4 justify-center">
                     <select defaultValue="15" disabled={shouldIncrement || totalSeconds > 0} className="select select-bordered w-36" onChange={e => setInterval(parseInt(e.target.value))}>
