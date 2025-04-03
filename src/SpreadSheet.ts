@@ -1,6 +1,11 @@
 import { Workbook } from 'exceljs';
 import { IntervalSubjects } from './types';
 
+interface Counts {
+    total: number;
+    oCount: number;
+}
+
 export const downloadSpreadsheet = async (subjects: IntervalSubjects[], comparison?: boolean) => {
     // build workbook / add a sheet
     const workbook = new Workbook();
@@ -37,7 +42,63 @@ export const downloadSpreadsheet = async (subjects: IntervalSubjects[], comparis
         }
 
         sheet.addRow(data);
-    })    
+    });    
+
+    // X percentage
+    // quick and dirty code, she needs this tomorrow lol
+    const percentages = new Map<string, Counts>(); // name -> {}
+    if (hasNames) {
+        // have names, get each name and initialize counts
+        const names = new Set<string>();
+
+        subjects.forEach(subject => {
+            if (subject.name !== undefined) {
+                names.add(subject.name)
+            }
+        });
+
+        names.forEach(name => {
+            percentages.set(name, {
+                total: 0,
+                oCount: 0
+            });
+        });
+    } else {
+        // doesnt have names, just 1 target
+        percentages.set('Target', {
+            total: 0,
+            oCount: 0
+        });
+    }
+
+    subjects.forEach(subject => {
+        if (hasNames) {
+            const oldCounts = percentages.get(subject.name!);
+
+            if (oldCounts) {
+                percentages.set(subject.name!, {
+                    total: oldCounts.total + 1,
+                    oCount: subject.target === 'o' ? oldCounts.oCount + 1 : oldCounts.oCount
+                });
+            }
+        } else {
+            const oldCounts = percentages.get('Target');
+
+            if (oldCounts) {
+                percentages.set('Target', {
+                    total: oldCounts.total + 1,
+                    oCount: subject.target === 'o' ? oldCounts.oCount + 1 : oldCounts.oCount
+                });
+            }
+        }
+    });
+
+    sheet.addRow([]);
+    percentages.forEach((counts, name) => {
+        const percentage = (counts.oCount / counts.total) * 100;
+        const rounded = Math.round(percentage * 100) / 100;
+        sheet.addRow([name, `${rounded}%`]);
+    });
 
     // build blob url
     const now = new Date();
